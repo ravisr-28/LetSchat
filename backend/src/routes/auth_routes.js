@@ -1,8 +1,7 @@
 import express from "express";
+import { signUp } from "../controller/auth_controller.js";
 
 const authRouter = express.Router()
-authRouter.get("/signup",(req,res)=>{
-    res.send("Signup")
-})
+authRouter.post("/signup",signUp)
 
 export default authRouter;
