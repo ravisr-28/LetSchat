@@ -30,8 +30,8 @@ const newUser = new UserModel({
 })
 
 if(newUser){
-    generateToken(newUser._id,res);
-    await newUser.save();
+    const savedUser = await newUser.save();
+    generateToken(savedUser._id,res);
    return res.status(201).json({message:"User created successfully",user:newUser})
 }else{
    return res.status(400).json({message:"Failed to create user"})
