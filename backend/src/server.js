@@ -3,12 +3,14 @@ import authRouter from "./routes/auth_routes.js";
 import path from "path";
 import { connectDB } from "./lib/db.js";
 import { ENV } from "./lib/env.js";
+import cookieparser from "cookie-parser";
 
 const app = express();
 const __dirname = path.resolve();
 
 const PORT = ENV.PORT || 3000;
 app.use(express.json());
+app.use(cookieparser());
 app.use("/api/auth",authRouter);
 
 if(ENV.NODE_ENV === "production"){
