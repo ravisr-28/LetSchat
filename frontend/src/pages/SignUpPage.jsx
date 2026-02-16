@@ -23,7 +23,7 @@ function SignUpPage() {
   };
   return (
     <div className="w-full flex items-center justify-center p-4 bg-slate-900">
-      <div className="relative w-full max-w-6xl md:h-[800px] h-[650px]">
+      <div className="relative w-full max-w-3xl md:h-[600px] h-[550px]">
         <AnimatedBorderContainer>
           <div className="w-full flex flex-col md:flex-row">
             {/* Form Section Left side*/}
@@ -38,7 +38,7 @@ function SignUpPage() {
                   <p>SignUp for a new Account</p>
                 </div>
                 {/* Form */}
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Full Name Input */}
                   <div>
                     <label className="auth-input-label">Username</label>
@@ -99,7 +99,7 @@ function SignUpPage() {
                     {isSigningUp ? (
                       <LoaderIcon className="w-full h-5 animate-spin text-center" />
                     ) : (
-                      "create Account"
+                      "Create Account"
                     )}
                   </button>
                 </form>
