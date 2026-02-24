@@ -1,6 +1,7 @@
 import { sendWelcomeEmail } from "../email/emailHandlers.js";
 import { generateToken } from "../lib/utils.js";
 import UserModel from "../models/user_model.js";
+import cloudinary from "../lib/cloudinary.js";
 import bcrypt from "bcryptjs";
 import { ENV } from "../lib/env.js";
 
@@ -81,6 +82,29 @@ export const Logout = (_, res) => {
   res.status(200).json({ message: "Logout successfull" });
 };
 
+// export const updateProfile = async (req, res) => {
+//   try {
+//     const { profilePic } = req.body;
+//     if (!profilePic) {
+//       return res.status(400).json({ message: "Profile pic is required" });
+//     }
+//     const userId = req.user._id;
+//     const uploadResponse = await cloudinary.uploader.upload(profilePic);
+//     const updateUser = await UserModel.findByIdAndUpdate(
+//       userId,
+//       { profilePic: uploadResponse.secure_url },
+//       { new: true },
+//     );
+
+//     res
+//       .status(200)
+//       .json({ message: "Profile updated successfully", user: updateUser });
+//   } catch (err) {
+//     console.log("Error in update profile:", err);
+//     return res.status(500).json({ message: "Server error" });
+//   }
+// };
+
 export const updateProfile = async (req, res) => {
   try {
     const { profilePic } = req.body;
@@ -89,15 +113,13 @@ export const updateProfile = async (req, res) => {
     }
     const userId = req.user._id;
     const uploadResponse = await cloudinary.uploader.upload(profilePic);
-    const updateUser = await UserModel.findByIdAndUpdate(
+    const updatedUser = await UserModel.findByIdAndUpdate(
       userId,
       { profilePic: uploadResponse.secure_url },
       { new: true },
     );
 
-    res
-      .status(200)
-      .json({ message: "Profile updated successfully", user: updateUser });
+    res.status(200).json({ message: "Profile updated successfully", user: updatedUser });
   } catch (err) {
     console.log("Error in update profile:", err);
     return res.status(500).json({ message: "Server error" });
