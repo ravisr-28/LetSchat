@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useAuthStore } from '../store/useAuthStore';
+import React, { useState } from "react";
+import { useAuthStore } from "../store/useAuthStore";
 import AnimatedBorderContainer from "../components/AnimatedBorderContainer";
 import {
   MessageCircleIcon,
@@ -21,11 +21,11 @@ function LoginPage() {
   };
   return (
     <div className="w-full flex items-center justify-center p-4 bg-slate-900">
-      <div className="relative w-full max-w-3xl md:h-[600px] h-[550px]">
+      <div className="relative w-full max-w-3xl h-auto min-h-[450px] md:h-[600px]">
         <AnimatedBorderContainer>
           <div className="w-full flex flex-col md:flex-row">
             {/* Form Section Left side*/}
-            <div className="md:w-1/2 p-8 flex items-center justify-center md:border-r border-slate-600/30">
+            <div className="md:w-1/2 p-5 md:p-8 flex items-center justify-center md:border-r border-slate-600/30">
               <div className="w-full max-w-md">
                 {/* Heading Text */}
                 <div className="text-center mb-8">
@@ -36,7 +36,7 @@ function LoginPage() {
                   <p>Login to access to your account</p>
                 </div>
                 {/* Form */}
-                <form onSubmit={handleSubmit} className='space-y-6'>
+                <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Email Input */}
                   <div>
                     <label className="auth-input-label">Email</label>
@@ -118,4 +118,4 @@ function LoginPage() {
   );
 }
 
-export default LoginPage
+export default LoginPage;

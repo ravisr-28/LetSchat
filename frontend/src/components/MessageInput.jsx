@@ -44,7 +44,7 @@ function MessageInput() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
   return (
-    <div className="p-4 border-t border-slate-700/50">
+    <div className="p-2 md:p-4 border-t border-slate-700/50">
       {imagePreview && (
         <div className="relative inline-block mb-3">
           <img
@@ -63,7 +63,7 @@ function MessageInput() {
       )}
       <form
         onSubmit={handleSendMessage}
-        className="max-w-3xl mx-auto flex space-x-4"
+        className="max-w-3xl mx-auto flex space-x-2 md:space-x-4"
       >
         <input
           type="text"
