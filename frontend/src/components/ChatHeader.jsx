@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
-import { XIcon } from "lucide-react";
+import { ArrowLeftIcon, XIcon } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 
 function ChatHeader() {
@@ -20,10 +20,17 @@ function ChatHeader() {
     };
   }, [selectedUser]);
   return (
-    <div className="flex justify-between items-center bg-slate-800/50 border-b border-slate-700/50 max-h-[84px] px-6 flex-1 py-2">
+    <div className="flex justify-between items-center bg-slate-800/50 border-b border-slate-700/50 max-h-[84px] px-3 md:px-6 flex-1 py-2">
       <div className="flex items-center space-x-3">
+        {/* Back button — mobile only */}
+        <button
+          onClick={() => setSelectedUser(null)}
+          className="md:hidden text-slate-400 hover:text-slate-200 transition-colors"
+        >
+          <ArrowLeftIcon className="w-5 h-5" />
+        </button>
         <div className={`avatar ${isOnline ? "online" : "offline"}`}>
-          <div className="w-12 rounded-full">
+          <div className="w-10 md:w-12 rounded-full">
             <img
               src={selectedUser.profilePic || "/avatar.png"}
               alt={selectedUser.username}
@@ -31,13 +38,16 @@ function ChatHeader() {
           </div>
         </div>
         <div>
-          <h3 className="text-slate-200 font-medium">
+          <h3 className="text-slate-200 font-medium text-sm md:text-base">
             {selectedUser.username}
           </h3>
-          <p className="text-sm text-slate-400">{isOnline ? "Online" : "Offline"}</p>
+          <p className="text-xs md:text-sm text-slate-400">
+            {isOnline ? "Online" : "Offline"}
+          </p>
         </div>
       </div>
-      <button onClick={() => setSelectedUser(null)}>
+      {/* Close button — desktop only */}
+      <button onClick={() => setSelectedUser(null)} className="hidden md:block">
         <XIcon className="w-5 h-5 text-slate-400 hover:text-slate-200 cursor-pointer transition-colors" />
       </button>
     </div>

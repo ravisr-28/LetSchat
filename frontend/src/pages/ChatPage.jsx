@@ -8,12 +8,16 @@ import ContactsList from "../components/ContactsList";
 import ChatContainer from "../components/ChatContainer";
 import NoConversationPlaceholder from "../components/NoConversationPlaceholder";
 function ChatPage() {
-  const { activeTab,selectedUser } = useChatStore();
+  const { activeTab, selectedUser } = useChatStore();
   return (
-    <div className="relative w-full max-w-4xl h-[650px]">
+    <div className="relative w-full max-w-4xl h-[100dvh] md:h-[650px]">
       <AnimatedBorderContainer>
-        {/* Left Side */}
-        <div className="w-80 bg-slate-800/50 backdrop-blur-sm flex flex-col">
+        {/* Left Side — Sidebar */}
+        <div
+          className={`${
+            selectedUser ? "hidden md:flex" : "flex"
+          } w-full md:w-80 bg-slate-800/50 backdrop-blur-sm flex-col`}
+        >
           <ProfileHeader />
           <ActiveTabSwitch />
 
@@ -22,10 +26,13 @@ function ChatPage() {
           </div>
         </div>
 
-        {/* Right Side */}
-
-        <div className="flex-1 flex flex-col bg-slate-900/50 backdrop-blur-sm">
-    {selectedUser ? <ChatContainer />: <NoConversationPlaceholder />}
+        {/* Right Side — Chat */}
+        <div
+          className={`${
+            selectedUser ? "flex" : "hidden md:flex"
+          } flex-1 flex-col bg-slate-900/50 backdrop-blur-sm`}
+        >
+          {selectedUser ? <ChatContainer /> : <NoConversationPlaceholder />}
         </div>
       </AnimatedBorderContainer>
     </div>
