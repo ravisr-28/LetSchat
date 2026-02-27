@@ -6,8 +6,8 @@ import { ENV } from "./lib/env.js";
 import cookieparser from "cookie-parser";
 import cors from "cors";
 import messageRouter from "./routes/message_routes.js";
+import { app, server } from "./lib/socket.js";
 
-const app = express();
 const __dirname = path.resolve();
 
 const PORT = ENV.PORT || 3000;
@@ -21,7 +21,7 @@ app.use("/api/message", messageRouter);
 if (ENV.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 }
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log("App is listening on: " + PORT);
   connectDB();
 });
