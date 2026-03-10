@@ -11,10 +11,13 @@ export const signUp = async (req, res) => {
     if (!username || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
-    if (password.length < 8) {
-      return res
-        .status(400)
-        .json({ message: "Password must be at least 8 characters long" });
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message:
+          "Password must be at least 8 characters with one uppercase, one lowercase, one number, and one special character (@$!%*?&)",
+      });
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -82,29 +85,6 @@ export const Logout = (_, res) => {
   res.status(200).json({ message: "Logout successfull" });
 };
 
-// export const updateProfile = async (req, res) => {
-//   try {
-//     const { profilePic } = req.body;
-//     if (!profilePic) {
-//       return res.status(400).json({ message: "Profile pic is required" });
-//     }
-//     const userId = req.user._id;
-//     const uploadResponse = await cloudinary.uploader.upload(profilePic);
-//     const updateUser = await UserModel.findByIdAndUpdate(
-//       userId,
-//       { profilePic: uploadResponse.secure_url },
-//       { new: true },
-//     );
-
-//     res
-//       .status(200)
-//       .json({ message: "Profile updated successfully", user: updateUser });
-//   } catch (err) {
-//     console.log("Error in update profile:", err);
-//     return res.status(500).json({ message: "Server error" });
-//   }
-// };
-
 export const updateProfile = async (req, res) => {
   try {
     const { profilePic } = req.body;
@@ -119,7 +99,9 @@ export const updateProfile = async (req, res) => {
       { new: true },
     );
 
-    res.status(200).json({ message: "Profile updated successfully", user: updatedUser });
+    res
+      .status(200)
+      .json({ message: "Profile updated successfully", user: updatedUser });
   } catch (err) {
     console.log("Error in update profile:", err);
     return res.status(500).json({ message: "Server error" });

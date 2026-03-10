@@ -9,6 +9,7 @@ import {
   LoaderIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -17,8 +18,21 @@ function SignUpPage() {
     password: "",
   });
   const { signup, isSigningUp } = useAuthStore();
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    const { password } = formData;
+    const missing = [];
+    if (password.length < 8) missing.push("8+ characters");
+    if (!/[A-Z]/.test(password)) missing.push("uppercase letter");
+    if (!/[a-z]/.test(password)) missing.push("lowercase letter");
+    if (!/\d/.test(password)) missing.push("number");
+    if (!/[@$!%*?&]/.test(password))
+      missing.push("special character (@$!%*?&)");
+    if (missing.length > 0) {
+      toast.error(`Password needs: ${missing.join(", ")}`);
+      return;
+    }
     signup(formData);
   };
   return (

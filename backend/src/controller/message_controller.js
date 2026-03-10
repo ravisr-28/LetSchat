@@ -53,12 +53,29 @@ export const sendMessage = async (req, res) => {
 
     const reveiverExists = await UserModel.findById({ _id: receiverId });
     if (!reveiverExists) {
-      return res.status(404).jsom({ message: "Receiver not found" });
+      return res.status(404).json({ message: "Receiver not found" });
     }
 
     let imageUrl;
     if (image) {
-      const uploadResponse = await cloudinary.uploader.upload(image);
+      // Retry logic for transient network errors (e.g. ECONNRESET in dev)
+      let uploadResponse;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          uploadResponse = await cloudinary.uploader.upload(image, {
+            resource_type: "image",
+            timeout: 30000,
+          });
+          break; // success, exit loop
+        } catch (uploadErr) {
+          console.log(
+            `Cloudinary upload attempt ${attempt}/3 failed:`,
+            uploadErr.message,
+          );
+          if (attempt === 3) throw uploadErr;
+          await new Promise((r) => setTimeout(r, 1000)); // wait 1s before retry
+        }
+      }
       imageUrl = uploadResponse.secure_url;
     }
 
@@ -71,14 +88,14 @@ export const sendMessage = async (req, res) => {
     await newMessage.save();
 
     const receiverSocketId = getReceiverSocketId(receiverId);
-    if(receiverSocketId){
+    if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", newMessage);
     }
 
     res.status(201).json({ message: "Message sent successfully", newMessage });
   } catch (err) {
-    console.log("Error sending message:", err);
-    res.status(500).json({ message: "Server error" });
+    console.log("Error sending message:", err.message || err);
+    res.status(500).json({ message: err.message || "Server error" });
   }
 };
 

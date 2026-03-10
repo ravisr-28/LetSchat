@@ -4,6 +4,7 @@ import { useChatStore } from "../store/useChatStore";
 import {
   LogOutIcon,
   LoaderIcon,
+  PencilIcon,
   Volume2Icon,
   VolumeOffIcon,
 } from "lucide-react";
@@ -36,22 +37,22 @@ function ProfileHeader() {
           {/* Avatar */}
           <div className="avatar online">
             <button
-              className="size-10 md:size-14 rounded-full overflow-hidden relative group"
+              className="size-10 md:size-14 rounded-full relative group"
               onClick={() => fileInputRef.current.click()}
               disabled={isUpdatingProfile}
             >
               <img
                 src={selectedImg || authUser?.profilePic || "/avatar.png"}
                 alt="User image"
-                className={`size-full object-cover ${isUpdatingProfile ? "opacity-40" : ""}`}
+                className={`size-full rounded-full object-cover ${isUpdatingProfile ? "opacity-40" : ""}`}
               />
               {isUpdatingProfile ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <LoaderIcon className="size-6 text-white animate-spin" />
                 </div>
               ) : (
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                  <span className="text-white text-xs">change</span>
+                <div className="absolute -bottom-0.5 -right-0.5 size-5 md:size-6 bg-purple-600 rounded-full flex items-center justify-center border-2 border-slate-800 group-hover:bg-purple-500 transition-colors">
+                  <PencilIcon className="size-2.5 md:size-3 text-white" />
                 </div>
               )}
             </button>
