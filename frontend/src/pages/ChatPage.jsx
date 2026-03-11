@@ -1,14 +1,39 @@
-import React from "react";
+import React, { useEffect } from "react";
 import AnimatedBorderContainer from "../components/AnimatedBorderContainer";
 import { useChatStore } from "../store/useChatStore";
+import { useFriendStore } from "../store/useFriendStore";
 import ProfileHeader from "../components/ProfileHeader";
 import ActiveTabSwitch from "../components/ActiveTabSwitch";
 import ChatsList from "../components/ChatsList";
 import ContactsList from "../components/ContactsList";
+import PendingRequests from "../components/PendingRequests";
 import ChatContainer from "../components/ChatContainer";
 import NoConversationPlaceholder from "../components/NoConversationPlaceholder";
+
 function ChatPage() {
   const { activeTab, selectedUser } = useChatStore();
+  const { subscribeToFriendEvents, unsubscribeFromFriendEvents, getPendingRequests } =
+    useFriendStore();
+
+  useEffect(() => {
+    subscribeToFriendEvents();
+    getPendingRequests();
+    return () => unsubscribeFromFriendEvents();
+  }, []);
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "chats":
+        return <ChatsList />;
+      case "contacts":
+        return <ContactsList />;
+      case "requests":
+        return <PendingRequests />;
+      default:
+        return <ChatsList />;
+    }
+  };
+
   return (
     <div className="relative w-full max-w-4xl h-[100dvh] md:h-[650px]">
       <AnimatedBorderContainer>
@@ -22,7 +47,7 @@ function ChatPage() {
           <ActiveTabSwitch />
 
           <div className="flex-1 overflow-y-auto p-4 space-y-2">
-            {activeTab === "chats" ? <ChatsList /> : <ContactsList />}
+            {renderTabContent()}
           </div>
         </div>
 

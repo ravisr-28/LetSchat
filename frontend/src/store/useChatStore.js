@@ -81,6 +81,29 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
+  deleteMessage: async (messageId) => {
+    const { messages } = get();
+    // Optimistic removal
+    set({ messages: messages.filter((m) => m._id !== messageId) });
+    try {
+      await axiosInstance.delete(`/message/delete/${messageId}`);
+    } catch (err) {
+      // Revert on error
+      set({ messages });
+      toast.error(err.response?.data?.message || "Failed to delete message");
+    }
+  },
+
+  deleteChat: async (userId) => {
+    try {
+      await axiosInstance.delete(`/message/chat/${userId}`);
+      set({ messages: [] });
+      toast.success("Chat deleted");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete chat");
+    }
+  },
+
   subscribeToMessages: () => {
     const { selectedUser, isSoundEnabled } = get();
     if (!selectedUser) return;
@@ -102,10 +125,23 @@ export const useChatStore = create((set, get) => ({
           .catch((e) => console.log("Audio play failed", e));
       }
     });
+
+    socket.on("messageDeleted", (messageId) => {
+      const currentMessages = get().messages;
+      set({ messages: currentMessages.filter((m) => m._id !== messageId) });
+    });
+
+    socket.on("chatDeleted", (deletedByUserId) => {
+      if (selectedUser._id === deletedByUserId) {
+        set({ messages: [] });
+      }
+    });
   },
 
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
+    socket.off("messageDeleted");
+    socket.off("chatDeleted");
   },
 }));

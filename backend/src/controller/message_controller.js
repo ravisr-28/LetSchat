@@ -2,6 +2,7 @@ import cloudinary from "../lib/cloudinary.js";
 import UserModel from "../models/user_model.js";
 import MessageModel from "../models/message_model.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+import { areFriends } from "./friend_controller.js";
 
 export const getAllContacts = async (req, res) => {
   try {
@@ -56,6 +57,14 @@ export const sendMessage = async (req, res) => {
       return res.status(404).json({ message: "Receiver not found" });
     }
 
+    // Check friendship
+    const friends = await areFriends(senderId, receiverId);
+    if (!friends) {
+      return res
+        .status(403)
+        .json({ message: "You must be friends to send messages" });
+    }
+
     let imageUrl;
     if (image) {
       // Retry logic for transient network errors (e.g. ECONNRESET in dev)
@@ -66,14 +75,14 @@ export const sendMessage = async (req, res) => {
             resource_type: "image",
             timeout: 30000,
           });
-          break; // success, exit loop
+          break;
         } catch (uploadErr) {
           console.log(
             `Cloudinary upload attempt ${attempt}/3 failed:`,
             uploadErr.message,
           );
           if (attempt === 3) throw uploadErr;
-          await new Promise((r) => setTimeout(r, 1000)); // wait 1s before retry
+          await new Promise((r) => setTimeout(r, 1000));
         }
       }
       imageUrl = uploadResponse.secure_url;
@@ -87,7 +96,7 @@ export const sendMessage = async (req, res) => {
     });
     await newMessage.save();
 
-    const receiverSocketId = getReceiverSocketId(receiverId);
+    const receiverSocketId = getReceiverSocketId(receiverId.toString());
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", newMessage);
     }
@@ -123,6 +132,65 @@ export const getChatPartners = async (req, res) => {
     res.status(200).json(chatPartners);
   } catch (err) {
     console.log("Error fetching chat partners:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Delete a single message (only by sender)
+export const deleteMessage = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { id: messageId } = req.params;
+
+    const message = await MessageModel.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+    if (!message.senderId.equals(userId)) {
+      return res
+        .status(403)
+        .json({ message: "You can only delete your own messages" });
+    }
+
+    await MessageModel.findByIdAndDelete(messageId);
+
+    // Notify the other user in real time
+    const receiverSocketId = getReceiverSocketId(
+      message.receiverId.toString(),
+    );
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageDeleted", messageId);
+    }
+
+    res.status(200).json({ message: "Message deleted" });
+  } catch (err) {
+    console.log("Error deleting message:", err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Delete entire chat between two users
+export const deleteChat = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { id: otherUserId } = req.params;
+
+    await MessageModel.deleteMany({
+      $or: [
+        { senderId: userId, receiverId: otherUserId },
+        { senderId: otherUserId, receiverId: userId },
+      ],
+    });
+
+    // Notify the other user in real time
+    const receiverSocketId = getReceiverSocketId(otherUserId.toString());
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("chatDeleted", userId.toString());
+    }
+
+    res.status(200).json({ message: "Chat deleted" });
+  } catch (err) {
+    console.log("Error deleting chat:", err.message);
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -1,19 +1,21 @@
 import React, { useRef, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
+import { useFriendStore } from "../store/useFriendStore";
 import {
   LogOutIcon,
   LoaderIcon,
   PencilIcon,
   Volume2Icon,
   VolumeOffIcon,
+  UserPlusIcon,
 } from "lucide-react";
 const mouseClickSound = new Audio("/sounds/mouse-click.mp3");
 
 function ProfileHeader() {
   const { logout, authUser, updateProfile, isUpdatingProfile } = useAuthStore();
-  const { isSoundEnabled, toggleSound } = useChatStore();
-  console.log("Auth User:", authUser);
+  const { isSoundEnabled, toggleSound, setActiveTab } = useChatStore();
+  const { pendingRequests } = useFriendStore();
 
   const [selectedImg, setSelectedImg] = useState(null);
   const fileInputRef = useRef(null);
@@ -81,6 +83,19 @@ function ProfileHeader() {
             onClick={logout}
           >
             <LogOutIcon className="size-5" />
+          </button>
+          {/* Friend requests btn */}
+          <button
+            className="text-slate-400 hover:text-slate-200 transition-colors relative"
+            onClick={() => setActiveTab("requests")}
+            title="Friend requests"
+          >
+            <UserPlusIcon className="size-5" />
+            {pendingRequests.length > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 size-4 text-[9px] bg-red-500 text-white rounded-full flex items-center justify-center">
+                {pendingRequests.length}
+              </span>
+            )}
           </button>
           {/* Sound toggle btn */}
 
