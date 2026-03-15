@@ -16,7 +16,18 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(
   cors({
-    origin: (origin, callback) => callback(null, origin || true),
+    origin: (origin, callback) => {
+      // In production, allow the configured client URL
+      // In development, allow any origin
+      if (!origin || origin === ENV.CLIENT_URL) {
+        return callback(null, origin || ENV.CLIENT_URL);
+      }
+      // Allow any origin in development
+      if (ENV.NODE_ENV === "development") {
+        return callback(null, origin);
+      }
+      return callback(null, origin);
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   }),
