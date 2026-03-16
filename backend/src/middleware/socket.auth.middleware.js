@@ -4,13 +4,19 @@ import { ENV } from "../lib/env.js";
 
 export const socketAuthMiddleware = async (socket, next) => {
   try {
-    const token = socket.handshake.headers.cookie
+    // Check cookie first, then auth token from handshake
+    let token = socket.handshake.headers.cookie
       ?.split("; ")
       .find((row) => row.startsWith("jwt="))
       ?.split("=")[1];
 
+    // Fallback: check auth token from handshake query/auth
     if (!token) {
-      console.log("Socket connection rejected: No token provide");
+      token = socket.handshake.auth?.token;
+    }
+
+    if (!token) {
+      console.log("Socket connection rejected: No token provided");
       return next(new Error("Unauthorized - Invalid token"));
     }
 

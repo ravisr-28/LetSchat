@@ -33,6 +33,10 @@ export const useAuthStore = create((set, get) => ({
     set({ isSigningUp: true });
     try {
       const res = await axiosInstance.post("/auth/signup", data);
+      // Store token in localStorage for cross-domain auth
+      if (res.data.token) {
+        localStorage.setItem("jwt", res.data.token);
+      }
       set({ authUser: res.data.user });
       toast.success("Signup successful!");
       get().connectSocket();
@@ -46,6 +50,10 @@ export const useAuthStore = create((set, get) => ({
     set({ isLoggingIn: true });
     try {
       const res = await axiosInstance.post("/auth/login", data);
+      // Store token in localStorage for cross-domain auth
+      if (res.data.token) {
+        localStorage.setItem("jwt", res.data.token);
+      }
       set({ authUser: res.data.user });
       toast.success("Logged in successfully");
       get().connectSocket();
@@ -59,6 +67,7 @@ export const useAuthStore = create((set, get) => ({
     try {
       await axiosInstance.post("/auth/logout");
       get().disconnectSocket();
+      localStorage.removeItem("jwt");
       set({ authUser: null });
       toast.success("Logged out successfully");
     } catch (err) {
@@ -83,9 +92,11 @@ export const useAuthStore = create((set, get) => ({
     const { authUser } = get();
     if (!authUser || get().socket?.connected) return;
     try {
+      const token = localStorage.getItem("jwt");
       const socket = io(BASE_URL, {
         withCredentials: true,
         query: { userId: authUser._id },
+        auth: { token },
       });
       socket.connect();
       set({ socket });

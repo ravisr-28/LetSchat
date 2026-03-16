@@ -38,10 +38,10 @@ export const signUp = async (req, res) => {
 
     if (newUser) {
       const savedUser = await newUser.save();
-      generateToken(savedUser._id, res);
+      const token = generateToken(savedUser._id, res);
       res
         .status(201)
-        .json({ message: "User created successfully", user: newUser });
+        .json({ message: "User created successfully", user: newUser, token });
 
       try {
         await sendWelcomeEmail(

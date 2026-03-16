@@ -1,9 +1,18 @@
 import jwt from "jsonwebtoken";
 import UserModel from "../models/user_model.js";
 import { ENV } from "../lib/env.js";
+
 export const protectedRoute = async (req, res, next) => {
   try {
-    const token = req.cookies.jwt;
+    // Check cookie first, then Authorization header
+    let token = req.cookies.jwt;
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.split(" ")[1];
+      }
+    }
+
     if (!token) {
       return res
         .status(401)
@@ -15,7 +24,9 @@ export const protectedRoute = async (req, res, next) => {
     }
     const user = await UserModel.findById(decoded.userId).select("-password");
     if (!user) {
-      return res.status(404).json({ message: "Unauthorized - user not found" });
+      return res
+        .status(404)
+        .json({ message: "Unauthorized - user not found" });
     }
     req.user = user;
     next();
