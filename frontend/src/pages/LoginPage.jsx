@@ -6,6 +6,8 @@ import {
   LockIcon,
   MailIcon,
   LoaderIcon,
+  EyeIcon,
+  EyeOffIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -15,6 +17,7 @@ function LoginPage() {
     password: "",
   });
   const { login, isLoggingIn } = useAuthStore();
+  const [showPassword, setShowPassword] = useState(false);
   const handleSubmit = (e) => {
     e.preventDefault();
     login(formData);
@@ -50,7 +53,7 @@ function LoginPage() {
                           setFormData({ ...formData, email: e.target.value })
                         }
                         className="input"
-                        placeholder="ravi@gmail.com"
+                        placeholder="Enter your email"
                       />
                     </div>
                   </div>
@@ -61,14 +64,25 @@ function LoginPage() {
                       <LockIcon className="auth-input-icon" />
 
                       <input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         value={formData.password}
                         onChange={(e) =>
                           setFormData({ ...formData, password: e.target.value })
                         }
-                        className="input"
+                        className="input pr-10"
                         placeholder="Enter your password"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                      >
+                        {showPassword ? (
+                          <EyeOffIcon className="size-4" />
+                        ) : (
+                          <EyeIcon className="size-4" />
+                        )}
+                      </button>
                     </div>
                   </div>
                   {/* Submit Button */}

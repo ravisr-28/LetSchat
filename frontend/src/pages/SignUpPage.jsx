@@ -7,6 +7,8 @@ import {
   MailIcon,
   UserIcon,
   LoaderIcon,
+  EyeIcon,
+  EyeOffIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -18,6 +20,7 @@ function SignUpPage() {
     password: "",
   });
   const { signup, isSigningUp } = useAuthStore();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -66,7 +69,7 @@ function SignUpPage() {
                           setFormData({ ...formData, username: e.target.value })
                         }
                         className="input"
-                        placeholder="Ravi Shankar"
+                        placeholder="Enter your name"
                       />
                     </div>
                   </div>
@@ -83,7 +86,7 @@ function SignUpPage() {
                           setFormData({ ...formData, email: e.target.value })
                         }
                         className="input"
-                        placeholder="ravi@gmail.com"
+                        placeholder="Enter your email"
                       />
                     </div>
                   </div>
@@ -94,14 +97,25 @@ function SignUpPage() {
                       <LockIcon className="auth-input-icon" />
 
                       <input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         value={formData.password}
                         onChange={(e) =>
                           setFormData({ ...formData, password: e.target.value })
                         }
-                        className="input"
+                        className="input pr-10"
                         placeholder="Enter your password"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                      >
+                        {showPassword ? (
+                          <EyeOffIcon className="size-4" />
+                        ) : (
+                          <EyeIcon className="size-4" />
+                        )}
+                      </button>
                     </div>
                   </div>
                   {/* Submit Button */}
