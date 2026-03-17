@@ -6,7 +6,7 @@ import ChatHeader from "./ChatHeader";
 import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import MessageInput from "./MessageInput";
 import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
-import { Trash2Icon, LockIcon } from "lucide-react";
+import { Trash2Icon, LockIcon, XIcon } from "lucide-react";
 
 function ChatContainer() {
   const {
@@ -22,6 +22,7 @@ function ChatContainer() {
   const { friends } = useFriendStore();
   const messageEndRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
   const chatContainerRef = useRef(null);
 
   const isFriend = friends.some((f) => f._id === selectedUser._id);
@@ -56,12 +57,20 @@ function ChatContainer() {
     };
   }, []);
 
+  // Close fullscreen on Escape
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape") setFullscreenImage(null);
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
+
   const handleContextMenu = (e, msg) => {
     if (msg.senderId !== authUser._id) return;
     if (msg.isOptimistic) return;
     e.preventDefault();
 
-    // Calculate position relative to viewport, clamped to stay visible
     const x = Math.min(e.clientX, window.innerWidth - 160);
     const y = Math.min(e.clientY, window.innerHeight - 50);
     setContextMenu({ x, y, messageId: msg._id });
@@ -106,7 +115,8 @@ function ChatContainer() {
                       <img
                         src={msg.image}
                         alt="Shared"
-                        className="max-h-60 object-cover"
+                        className="max-h-60 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => setFullscreenImage(msg.image)}
                       />
                       <span className="absolute bottom-1 right-2 text-[10px] text-white bg-black/50 px-1.5 py-0.5 rounded-full">
                         {new Date(msg.createdAt).toLocaleTimeString(undefined, {
@@ -139,7 +149,7 @@ function ChatContainer() {
         )}
       </div>
 
-      {/* Context menu for delete — rendered outside scroll container */}
+      {/* Context menu for delete */}
       {contextMenu && (
         <div
           className="fixed z-[9999] bg-slate-800 border border-slate-600 rounded-lg shadow-2xl py-1 min-w-[150px]"
@@ -151,6 +161,27 @@ function ChatContainer() {
           >
             <Trash2Icon className="size-4" /> Delete message
           </button>
+        </div>
+      )}
+
+      {/* Fullscreen image viewer */}
+      {fullscreenImage && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setFullscreenImage(null)}
+        >
+          <button
+            onClick={() => setFullscreenImage(null)}
+            className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors z-10"
+          >
+            <XIcon className="size-8" />
+          </button>
+          <img
+            src={fullscreenImage}
+            alt="Full size"
+            className="max-w-full max-h-full object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
 

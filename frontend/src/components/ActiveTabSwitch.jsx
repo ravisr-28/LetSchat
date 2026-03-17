@@ -19,7 +19,7 @@ const ActiveTabSwitch = () => {
         className={`tab flex-1 gap-1 ${activeTab === "contacts" ? "bg-purple-500/50 text-purple-400" : "text-slate-400"}`}
       >
         <UsersIcon className="size-4" />
-        Contacts
+        Add friends
       </button>
     </div>
   );

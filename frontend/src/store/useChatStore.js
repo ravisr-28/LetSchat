@@ -12,6 +12,7 @@ export const useChatStore = create((set, get) => ({
   isUsersLoading: false,
   isMessagesLoading: false,
   isSoundEnabled: JSON.parse(localStorage.getItem("isSoundEnabled")) === true,
+  chatListVersion: 0,
 
   toggleSound: () => {
     localStorage.setItem("isSoundEnabled", !get().isSoundEnabled);
@@ -74,7 +75,7 @@ export const useChatStore = create((set, get) => ({
         `/message/send/${selectedUser._id}`,
         messageData,
       );
-      set({ messages: messages.concat(res.data.newMessage) });
+      set({ messages: messages.concat(res.data.newMessage), chatListVersion: get().chatListVersion + 1 });
     } catch (error) {
       set({ messages: messages });
       toast.error(error.response?.data?.message || "Something went wrong");
@@ -115,7 +116,7 @@ export const useChatStore = create((set, get) => ({
         newMessage.senderId === selectedUser._id;
       if (!isMessageSentFromSelectedUser) return;
       const currentMessage = get().messages;
-      set({ messages: [...currentMessage, newMessage] });
+      set({ messages: [...currentMessage, newMessage], chatListVersion: get().chatListVersion + 1 });
 
       if (isSoundEnabled) {
         const notificationSound = new Audio("/sounds/notification.mp3");
