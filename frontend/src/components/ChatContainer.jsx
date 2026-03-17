@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useChatStore } from "../store/useChatStore";
 import { useFriendStore } from "../store/useFriendStore";
 import { useAuthStore } from "../store/useAuthStore";
@@ -26,6 +27,11 @@ function ChatContainer() {
   const chatContainerRef = useRef(null);
 
   const isFriend = friends.some((f) => f._id === selectedUser._id);
+
+  // Close fullscreen image when switching chats
+  useEffect(() => {
+    setFullscreenImage(null);
+  }, [selectedUser]);
 
   useEffect(() => {
     getMessagesByUserId(selectedUser._id);
@@ -164,26 +170,28 @@ function ChatContainer() {
         </div>
       )}
 
-      {/* Fullscreen image viewer */}
-      {fullscreenImage && (
-        <div
-          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
-          onClick={() => setFullscreenImage(null)}
-        >
-          <button
+      {/* Fullscreen image viewer — portaled to body so it covers full viewport */}
+      {fullscreenImage &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[99999] bg-black/90 flex items-center justify-center p-4"
             onClick={() => setFullscreenImage(null)}
-            className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors z-10"
           >
-            <XIcon className="size-8" />
-          </button>
-          <img
-            src={fullscreenImage}
-            alt="Full size"
-            className="max-w-full max-h-full object-contain rounded-lg"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
+            <button
+              onClick={() => setFullscreenImage(null)}
+              className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors z-10"
+            >
+              <XIcon className="size-8" />
+            </button>
+            <img
+              src={fullscreenImage}
+              alt="Full size"
+              className="max-w-full max-h-full object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>,
+          document.body,
+        )}
 
       {/* Show MessageInput only if friends, otherwise show guard */}
       {isFriend ? (
