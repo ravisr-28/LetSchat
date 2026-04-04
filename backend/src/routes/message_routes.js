@@ -3,6 +3,7 @@ import {
   getAllContacts,
   getChatPartners,
   getMessagesByUserId,
+  getLastMessages,
   sendMessage,
   deleteMessage,
   deleteChat,
@@ -16,6 +17,7 @@ messageRouter.use(arcjetProtection, protectedRoute);
 
 messageRouter.get("/contact", getAllContacts);
 messageRouter.get("/chats", getChatPartners);
+messageRouter.get("/last-messages", getLastMessages);
 messageRouter.get("/:id", getMessagesByUserId);
 messageRouter.post("/send/:id", sendMessage);
 messageRouter.delete("/delete/:id", deleteMessage);

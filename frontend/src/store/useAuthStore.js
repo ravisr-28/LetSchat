@@ -65,13 +65,18 @@ export const useAuthStore = create((set, get) => ({
   },
   logout: async () => {
     try {
-      await axiosInstance.post("/auth/logout");
       get().disconnectSocket();
+      // Reset related stores — dynamic import to avoid circular dependency
+      const { useChatStore } = await import("./useChatStore");
+      useChatStore.getState().resetChatState();
       localStorage.removeItem("jwt");
-      set({ authUser: null });
+      await axiosInstance.post("/auth/logout");
+      set({ authUser: null, onlineUsers: [] });
       toast.success("Logged out successfully");
     } catch (err) {
-      toast.error("Error logging out");
+      // Still clear local state even if API call fails
+      localStorage.removeItem("jwt");
+      set({ authUser: null, onlineUsers: [], socket: null });
     }
   },
 

@@ -16,32 +16,30 @@ function ChatsList() {
     getFriends();
   }, [getFriends]);
 
-  // Sort friends by most recent message
+  // Sort friends by most recent message — single API call
   useEffect(() => {
     if (friends.length === 0) {
       setSortedFriends([]);
       return;
     }
 
-    const fetchLastMessages = async () => {
+    const fetchAndSort = async () => {
       try {
-        const friendsWithTime = await Promise.all(
-          friends.map(async (friend) => {
-            try {
-              const res = await axiosInstance.get(`/message/${friend._id}`);
-              const messages = res.data;
-              const lastMsg = messages.length > 0 ? messages[messages.length - 1] : null;
-              return {
-                ...friend,
-                lastMessageAt: lastMsg ? new Date(lastMsg.createdAt).getTime() : 0,
-                lastMessageText: lastMsg?.text || (lastMsg?.image ? "📷 Image" : ""),
-              };
-            } catch {
-              return { ...friend, lastMessageAt: 0, lastMessageText: "" };
-            }
-          }),
-        );
-        // Sort by last message time (most recent first), friends with no messages go last
+        const res = await axiosInstance.get("/message/last-messages");
+        const lastMessagesMap = {};
+        for (const msg of res.data) {
+          lastMessagesMap[msg.friendId] = msg;
+        }
+
+        const friendsWithTime = friends.map((friend) => {
+          const lastMsg = lastMessagesMap[friend._id];
+          return {
+            ...friend,
+            lastMessageAt: lastMsg ? new Date(lastMsg.createdAt).getTime() : 0,
+            lastMessageText: lastMsg?.text || (lastMsg?.image ? "📷 Image" : ""),
+          };
+        });
+
         friendsWithTime.sort((a, b) => b.lastMessageAt - a.lastMessageAt);
         setSortedFriends(friendsWithTime);
       } catch {
@@ -49,7 +47,7 @@ function ChatsList() {
       }
     };
 
-    fetchLastMessages();
+    fetchAndSort();
   }, [friends, chatListVersion]);
 
   if (isLoading) return <UsersLoadingSkeleton />;

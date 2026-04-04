@@ -136,6 +136,48 @@ export const getChatPartners = async (req, res) => {
   }
 };
 
+// Get last message for each friend — single aggregation instead of N queries
+export const getLastMessages = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const lastMessages = await MessageModel.aggregate([
+      {
+        $match: {
+          $or: [{ senderId: userId }, { receiverId: userId }],
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: {
+            $cond: [
+              { $eq: ["$senderId", userId] },
+              "$receiverId",
+              "$senderId",
+            ],
+          },
+          lastMessage: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $project: {
+          friendId: "$_id",
+          text: "$lastMessage.text",
+          image: "$lastMessage.image",
+          createdAt: "$lastMessage.createdAt",
+          _id: 0,
+        },
+      },
+    ]);
+
+    res.status(200).json(lastMessages);
+  } catch (err) {
+    console.log("Error fetching last messages:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 // Delete a single message (only by sender)
 export const deleteMessage = async (req, res) => {
   try {

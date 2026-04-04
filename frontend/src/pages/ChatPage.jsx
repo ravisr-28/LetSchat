@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import AnimatedBorderContainer from "../components/AnimatedBorderContainer";
 import { useChatStore } from "../store/useChatStore";
 import { useFriendStore } from "../store/useFriendStore";
+import { useAuthStore } from "../store/useAuthStore";
 import ProfileHeader from "../components/ProfileHeader";
 import ActiveTabSwitch from "../components/ActiveTabSwitch";
 import ChatsList from "../components/ChatsList";
@@ -12,14 +13,33 @@ import NoConversationPlaceholder from "../components/NoConversationPlaceholder";
 
 function ChatPage() {
   const { activeTab, selectedUser } = useChatStore();
-  const { subscribeToFriendEvents, unsubscribeFromFriendEvents, getPendingRequests } =
-    useFriendStore();
+  const { socket } = useAuthStore();
+  const {
+    subscribeToFriendEvents,
+    unsubscribeFromFriendEvents,
+    getPendingRequests,
+  } = useFriendStore();
 
+  // Subscribe to friend events
   useEffect(() => {
     subscribeToFriendEvents();
     getPendingRequests();
     return () => unsubscribeFromFriendEvents();
   }, []);
+
+  // Global listener: bump chatListVersion on ANY incoming message for chat sorting
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleGlobalMessage = () => {
+      useChatStore.setState((state) => ({
+        chatListVersion: state.chatListVersion + 1,
+      }));
+    };
+
+    socket.on("newMessage", handleGlobalMessage);
+    return () => socket.off("newMessage", handleGlobalMessage);
+  }, [socket]);
 
   const renderTabContent = () => {
     switch (activeTab) {
