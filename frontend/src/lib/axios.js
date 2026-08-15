@@ -6,6 +6,7 @@ export const axiosInstance = axios.create({
       ? `http://${window.location.hostname}:3000/api`
       : `${import.meta.env.VITE_API_URL || ""}/api`,
   withCredentials: true,
+  timeout: 10000, // 10 second timeout — prevents hanging when backend is unreachable
 });
 
 // Attach JWT token from localStorage to every request

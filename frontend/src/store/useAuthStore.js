@@ -17,14 +17,21 @@ export const useAuthStore = create((set, get) => ({
   socket: null,
 
   checkAuth: async () => {
+    // Abort auth check after 5 seconds so the login page renders quickly
+    // even if the backend is slow or unreachable
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     try {
-      const res = await axiosInstance.get("/auth/check");
+      const res = await axiosInstance.get("/auth/check", {
+        signal: controller.signal,
+      });
       set({ authUser: res.data.user });
       get().connectSocket();
     } catch (err) {
       console.log("Error checking auth:", err);
       set({ authUser: null });
     } finally {
+      clearTimeout(timeoutId);
       set({ isCheckingAuth: false });
     }
   },
