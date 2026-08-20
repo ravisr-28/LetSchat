@@ -1,13 +1,16 @@
 import axios from "axios";
 
+const BACKEND_URL =
+  import.meta.env.MODE === "development"
+    ? `http://${window.location.hostname}:3000`
+    : import.meta.env.VITE_API_URL || "https://letschat-backend-l8tw.onrender.com";
+
 export const axiosInstance = axios.create({
-  baseURL:
-    import.meta.env.MODE === "development"
-      ? `http://${window.location.hostname}:3000/api`
-      : `${import.meta.env.VITE_API_URL || ""}/api`,
+  baseURL: `${BACKEND_URL}/api`,
   withCredentials: true,
   timeout: 10000, // 10 second timeout — prevents hanging when backend is unreachable
 });
+
 
 // Attach JWT token from localStorage to every request
 axiosInstance.interceptors.request.use((config) => {
